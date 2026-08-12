@@ -33,7 +33,12 @@ export default function Signup() {
         setError('');
         setIsLoading(true);
 
-        const res = await signup(formData);
+        const payload = {
+            ...formData,
+            user_type: formData.role
+        };
+
+        const res = await signup(payload);
         
         if (res.success) {
             navigate('/login');

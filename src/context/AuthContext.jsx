@@ -117,17 +117,6 @@ export const AuthProvider = ({ children }) => {
       
       let normalizedRole = rawRole?.toString().trim().toLowerCase() || "student";
 
-      // Fallback: If the backend incorrectly returns 'student' for everyone due to a DB default,
-      // we can infer the intended role from the email for demo/testing purposes.
-      if (normalizedRole === "student" && userData?.email) {
-          const emailLower = userData.email.toLowerCase();
-          if (emailLower.includes("admin")) {
-              normalizedRole = "admin";
-          } else if (emailLower.includes("staff")) {
-              normalizedRole = "staff";
-          }
-      }
-
       if (
         normalizedRole !== "student" &&
         normalizedRole !== "staff" &&

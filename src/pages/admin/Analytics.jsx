@@ -32,16 +32,18 @@ export default function Analytics() {
 
                 setDashboard(dashRes.data);
                 
-                // Format data for Recharts (assuming backend returns { label: count, ... } or [{name: 'x', value: 1}])
-                // If backend returns dicts like {"Pending": 5, "Resolved": 10}, we map them.
+                // Format data for Recharts
                 const mapDict = (dict) => Object.entries(dict).map(([name, value]) => ({ name, value }));
+                
+                // Helper to map array of objects with dynamic keys to {name, value}
+                const mapArray = (arr, nameKey) => arr.map(item => ({ name: item[nameKey], value: item.count }));
 
-                // Recharts expects array of objects
-                setStatusData(Array.isArray(statRes.data) ? statRes.data : mapDict(statRes.data));
-                setCategoryData(Array.isArray(catRes.data) ? catRes.data : mapDict(catRes.data));
-                setDepartmentData(Array.isArray(deptRes.data) ? deptRes.data : mapDict(deptRes.data));
-                setPriorityData(Array.isArray(prioRes.data) ? prioRes.data : mapDict(prioRes.data));
-                setMonthlyData(Array.isArray(monthRes.data) ? monthRes.data : mapDict(monthRes.data));
+                // Recharts expects array of objects with 'name' and 'value'
+                setStatusData(Array.isArray(statRes.data) ? mapArray(statRes.data, 'status') : mapDict(statRes.data));
+                setCategoryData(Array.isArray(catRes.data) && catRes.data.length > 0 && 'category' in catRes.data[0] ? mapArray(catRes.data, 'category') : mapDict(catRes.data));
+                setDepartmentData(Array.isArray(deptRes.data) && deptRes.data.length > 0 && 'department' in deptRes.data[0] ? mapArray(deptRes.data, 'department') : mapDict(deptRes.data));
+                setPriorityData(Array.isArray(prioRes.data) && prioRes.data.length > 0 && 'priority' in prioRes.data[0] ? mapArray(prioRes.data, 'priority') : mapDict(prioRes.data));
+                setMonthlyData(Array.isArray(monthRes.data) && monthRes.data.length > 0 && 'month' in monthRes.data[0] ? mapArray(monthRes.data, 'month') : mapDict(monthRes.data));
                 
             } catch (error) {
                 console.error("Failed to fetch analytics", error);
@@ -109,25 +111,29 @@ export default function Analytics() {
                         <CardTitle>Status Distribution</CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={statusData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={100}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {statusData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <RechartsTooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {statusData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={statusData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={100}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {statusData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-500">No status data available.</div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -137,23 +143,27 @@ export default function Analytics() {
                         <CardTitle>Priority Distribution</CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={priorityData}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={100}
-                                    dataKey="value"
-                                >
-                                    {priorityData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <RechartsTooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {priorityData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={priorityData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        dataKey="value"
+                                    >
+                                        {priorityData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-500">No priority data available.</div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -163,15 +173,19 @@ export default function Analytics() {
                         <CardTitle>Complaints by Category</CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={categoryData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <RechartsTooltip />
-                                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {categoryData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={categoryData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <RechartsTooltip />
+                                    <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-500">No category data available.</div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -181,15 +195,19 @@ export default function Analytics() {
                         <CardTitle>Department Statistics</CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={departmentData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                                <XAxis type="number" />
-                                <YAxis dataKey="name" type="category" width={100} />
-                                <RechartsTooltip />
-                                <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {departmentData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={departmentData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                    <XAxis type="number" />
+                                    <YAxis dataKey="name" type="category" width={100} />
+                                    <RechartsTooltip />
+                                    <Bar dataKey="value" fill="#10b981" radius={[0, 4, 4, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-500">No department data available.</div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -199,15 +217,19 @@ export default function Analytics() {
                         <CardTitle>Monthly Trend</CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={monthlyData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <RechartsTooltip />
-                                <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        {monthlyData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={monthlyData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <RechartsTooltip />
+                                    <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-500">No monthly trend data available.</div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

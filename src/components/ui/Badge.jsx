@@ -4,9 +4,9 @@ import { cn } from "../../lib/utils"
 function Badge({ className, variant = "default", ...props }) {
   const variants = {
     default: "border-transparent bg-primary-600 text-white hover:bg-primary-700",
-    secondary: "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200",
+    secondary: "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600",
     destructive: "border-transparent bg-red-500 text-white hover:bg-red-600",
-    outline: "text-slate-950",
+    outline: "text-slate-950 dark:text-slate-200",
     success: "border-transparent bg-green-500 text-white hover:bg-green-600",
     warning: "border-transparent bg-amber-500 text-white hover:bg-amber-600",
   }

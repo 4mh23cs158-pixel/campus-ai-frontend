@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Card, CardContent } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
@@ -72,9 +72,15 @@ export default function AdminComplaints() {
         }
     };
 
-    const handleAssignClick = (id) => {
+    const openAssignModal = (id) => {
         setSelectedComplaintId(id);
         setAssignModalOpen(true);
+    };
+
+    const closeAssignModal = () => {
+        setAssignModalOpen(false);
+        setSelectedComplaintId(null);
+        setSelectedStaffId('');
     };
 
     const submitAssign = async () => {
@@ -82,8 +88,7 @@ export default function AdminComplaints() {
         try {
             await api.put(`/complaints/${selectedComplaintId}/assign?staff_id=${selectedStaffId}`);
             alert("Complaint assigned successfully.");
-            setAssignModalOpen(false);
-            setSelectedStaffId('');
+            closeAssignModal();
             fetchComplaints();
         } catch (error) {
             console.error("Failed to assign staff", error);
@@ -171,7 +176,7 @@ export default function AdminComplaints() {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button variant="outline" size="sm" onClick={() => handleAssignClick(c.id)}>
+                                                    <Button variant="outline" size="sm" onClick={() => openAssignModal(c.id)}>
                                                         <UserPlus className="h-4 w-4 md:mr-1" />
                                                         <span className="hidden md:inline">Assign</span>
                                                     </Button>
@@ -208,7 +213,7 @@ export default function AdminComplaints() {
                             </div>
                         </CardContent>
                         <div className="p-6 pt-0 flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setAssignModalOpen(false)}>Cancel</Button>
+                            <Button variant="outline" onClick={closeAssignModal}>Cancel</Button>
                             <Button onClick={submitAssign} disabled={!selectedStaffId}>Assign</Button>
                         </div>
                     </Card>

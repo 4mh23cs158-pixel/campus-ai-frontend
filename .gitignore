@@ -15,7 +15,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -29,3 +29,14 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Build files and caches
+.eslintcache
+.vite/
+
+# OS specific files
+Thumbs.db
+.DS_Store
+
+# Lockfiles are typically committed for reproducible installs.
+# If you want to stop tracking a lockfile, remove it from git first.

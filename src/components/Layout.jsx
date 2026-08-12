@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext.jsx';
 import { 
     LayoutDashboard, 
     ClipboardList, 
@@ -11,12 +12,15 @@ import {
     Building2,
     BarChart3,
     Menu,
-    X
+    X,
+    Moon,
+    Sun
 } from 'lucide-react';
 import { Button } from './ui/Button';
 
 const Layout = () => {
     const { role, currentUser, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const location = useLocation();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -55,13 +59,18 @@ const Layout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+        <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col md:flex-row">
             {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between bg-white border-b p-4">
+            <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-900 border-b dark:border-slate-800 p-4">
                 <span className="text-xl font-bold text-primary-600">CampusCare</span>
-                <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+                        {theme === 'dark' ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                        {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </Button>
+                </div>
             </div>
 
             {/* Sidebar */}
@@ -70,8 +79,11 @@ const Layout = () => {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="h-full flex flex-col">
-                    <div className="p-6 hidden md:block">
+                    <div className="p-6 hidden md:flex items-center justify-between">
                         <span className="text-2xl font-bold text-primary-600 tracking-tight">CampusCare</span>
+                        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+                            {theme === 'dark' ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+                        </Button>
                     </div>
 
                     <nav className="flex-1 px-4 py-4 space-y-1">
@@ -86,23 +98,23 @@ const Layout = () => {
                                     className={`
                                         flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                                         ${isActive 
-                                            ? 'bg-primary-50 text-primary-700' 
-                                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+                                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-700/10 dark:text-primary-200' 
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'}
                                     `}
                                 >
-                                    <Icon className={`mr-3 h-5 w-5 ${isActive ? 'text-primary-700' : 'text-slate-400'}`} />
+                                    <Icon className={`mr-3 h-5 w-5 ${isActive ? 'text-primary-700 dark:text-primary-200' : 'text-slate-400 dark:text-slate-400'}`} />
                                     {item.label}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    <div className="p-4 border-t">
+                    <div className="p-4 border-t border-slate-200 dark:border-slate-800">
                         <div className="mb-4 px-3 flex flex-col">
-                            <span className="text-sm font-medium text-slate-900 truncate">{currentUser?.name || 'User'}</span>
-                            <span className="text-xs text-slate-500 capitalize">{role}</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{currentUser?.name || 'User'}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role}</span>
                         </div>
-                        <Button variant="ghost" className="w-full justify-start text-slate-600" onClick={handleLogout}>
+                        <Button variant="ghost" className="w-full justify-start text-slate-600 dark:text-slate-200" onClick={handleLogout}>
                             <LogOut className="mr-3 h-5 w-5 text-slate-400" />
                             Sign Out
                         </Button>
